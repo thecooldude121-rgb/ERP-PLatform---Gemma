@@ -1,0 +1,111 @@
+import { Type } from "@google/genai";
+
+export interface EntityDefinition {
+  title: string;
+  description: string;
+  type: "object";
+  properties: {
+    [propertyName: string]: {
+      type: string;
+      format?: string;
+      description?: string;
+      enum?: any[];
+      $ref?: string;
+    };
+  };
+  required?: string[];
+}
+
+export interface FirebaseBlueprintConfig {
+  entities: {
+    [entityName: string]: EntityDefinition;
+  };
+  firestore?: {
+    [collectionPath: string]: {
+      schema: string | { $ref: string };
+      description: string;
+    };
+  };
+}
+
+export const blueprint: FirebaseBlueprintConfig = {
+  entities: {
+    User: {
+      title: "User",
+      description: "A user of the BMI platform.",
+      type: "object",
+      properties: {
+        uid: { type: "string", description: "Firebase Auth UID" },
+        email: { type: "string", format: "email" },
+        displayName: { type: "string" },
+        role: { type: "string", enum: ["founder", "sales_leader", "sdr_ae", "hr", "support"] },
+        teamId: { type: "string" },
+        photoURL: { type: "string" }
+      },
+      required: ["uid", "email", "role"]
+    },
+    Lead: {
+      title: "Lead",
+      description: "A potential customer.",
+      type: "object",
+      properties: {
+        id: { type: "string" },
+        firstName: { type: "string" },
+        lastName: { type: "string" },
+        email: { type: "string", format: "email" },
+        company: { type: "string" },
+        status: { type: "string", enum: ["new", "contacted", "qualified", "unqualified"] },
+        score: { type: "number" },
+        source: { type: "string" },
+        assignedTo: { type: "string", description: "User UID" },
+        createdAt: { type: "string", format: "date-time" }
+      }
+    },
+    Account: {
+      title: "Account",
+      description: "A company account.",
+      type: "object",
+      properties: {
+        id: { type: "string" },
+        name: { type: "string" },
+        industry: { type: "string" },
+        healthScore: { type: "number" },
+        ownerId: { type: "string" }
+      }
+    },
+    Deal: {
+      title: "Deal",
+      description: "A sales opportunity.",
+      type: "object",
+      properties: {
+        id: { type: "string" },
+        title: { type: "string" },
+        accountId: { type: "string" },
+        amount: { type: "number" },
+        stage: { type: "string", enum: ["discovery", "proposal", "negotiation", "closed_won", "closed_lost"] },
+        probability: { type: "number" },
+        expectedCloseDate: { type: "string", format: "date" }
+      }
+    },
+    Employee: {
+      title: "Employee",
+      description: "HR record for a team member.",
+      type: "object",
+      properties: {
+        uid: { type: "string" },
+        role: { type: "string" },
+        managerId: { type: "string" },
+        department: { type: "string" },
+        performanceRating: { type: "number" },
+        capacity: { type: "number", description: "Current workload percentage" }
+      }
+    }
+  },
+  firestore: {
+    "/users/{uid}": { schema: "User", description: "User profiles" },
+    "/leads/{leadId}": { schema: "Lead", description: "Leads database" },
+    "/accounts/{accountId}": { schema: "Account", description: "Company accounts" },
+    "/deals/{dealId}": { schema: "Deal", description: "Sales deals" },
+    "/employees/{uid}": { schema: "Employee", description: "HR employee records" }
+  }
+};

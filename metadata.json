@@ -1,0 +1,8 @@
+{
+  "name": "BMI OS",
+  "description": "High-performance enterprise intelligence layer for BMI, managing complex client data and upselling operations.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
